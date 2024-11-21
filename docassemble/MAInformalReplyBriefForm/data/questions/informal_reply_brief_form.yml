@@ -1,33 +1,56 @@
 ---
 include:
   - docassemble.AssemblyLine:assembly_line.yml
+  - docassemble.MassAccess:massaccess.yml
 ---
 metadata:
   title: >-
-    Informal reply brief form
+    Informal reply brief
   short title: >-
-    Informal reply brief form
+    Informal reply brief
   description: |-
-    Informal reply brief form
+    This interview helps someone in Massachusetts write a reply brief for the Appeals Court
   can_I_use_this_form: |
+    If you are replying to a brief that somebody else wrote, you can use this interview.
   before_you_start: |
-    Before you get started, you need to...
+    You will need to know the following information to complete this interview:
+
+        * The **Appeals Court** docket number for your case
+        * The **Trial Court** docket number for your case
+        * The names of the plaintiff(s) and defendant(s) in your trial court case
+        * The current due date for your brief
+        * The date by which you are able to file your brief by, within the court guidelines 
   maturity: production
-  estimated_completion_minutes: ""
-  estimated_completion_delta: ""
-  tags: []
+  estimated_completion_minutes: 30
+  estimated_completion_delta: 5
+  LIST_topics: 
+    - "CO-00-00-00-00"
+    - "CO-02-00-00-00"
+    - "CO-03-00-00-00"
+    - "CO-07-05-00-00"
+  tags:
+    - "CO-00-00-00-00"
+    - "CO-02-00-00-00"
+    - "CO-03-00-00-00"
+    - "CO-07-05-00-00"
   authors:
-    -  
-  original_form: []
+    - Jack Brandt
+  original_form:
+    - https://www.mass.gov/info-details/appeals-court-informal-brief-pilot-program
   original_form_published_on: ""
-  allowed_courts: []
-  typical_role: "unknown"
+  help_page_url: >-
+    https://www.mass.gov/info-details/appeals-court-informal-brief-pilot-program
+  help_page_title: >-
+    AppealsCourt
+  allowed_courts: 
+    - "Appeals Court"
+  typical_role: "appellant"
   al_weaver_version: "1.11.0"
-  generated_on: "2024-10-30"
+  generated_on: "2024-10-24"
   languages:
     - en
-  jurisdiction: ""
-  review_date: 2024-10-30
+  jurisdiction: NAM-US-US+MA
+  review_date: 2024-10-24
   form_titles:
     - Informal reply brief form
   form_numbers: []
@@ -39,7 +62,7 @@ code: |
 ---
 code: |
   # This controls the default state in address field questions
-  AL_DEFAULT_STATE = ""
+  AL_DEFAULT_STATE = "MA"
 ---
 code: |
   github_repo_name =  'docassemble-InformalReplyBriefForm'
@@ -48,11 +71,14 @@ code: |
   interview_short_title = "File a Informal reply brief form"
 ---
 code: |
-  al_form_type = "existing_case" 
+  al_form_type = "appeal" 
 ---
 objects:
-  - users: ALPeopleList
-  - other_parties: ALPeopleList
+  - users: ALPeopleList.using(there_are_any=True)
+  - other_parties: ALPeopleList.using(there_are_any=True)
+  - challenged_judgments: DAList.using(target_number=1, there_are_any=True)
+  - appeal_facts: DAList.using(target_number=1, there_are_any=True)
+  - appeal_arguments: DAList.using(target_number=1, there_are_any=True)
 ---
 sections:
   - review_informal_reply_brief_form: Review your answers
@@ -63,18 +89,20 @@ comment: |
 id: interview_order_informal_reply_brief_form
 code: |
   # Set the allowed courts for this interview
-  allowed_courts = []
+  allowed_courts
   nav.set_section("review_informal_reply_brief_form")
   # Below sets the user_role and user_ask_role by asking a question.
   # You can set user_ask_role directly instead to either 'plaintiff' or 'defendant'
-  user_ask_role
+  # user_ask_role #user is appellant
+  user_role
   users.gather()
-  set_parts(subtitle=str(users))
   users[0].pronouns
   users[0].email
-  set_progress(16)
   users[0].phone_number
   users[0].address.address
+  set_parts(subtitle=str(users))
+  Information
+  set_progress(16)
   other_parties.gather()
   set_progress(32)
   other_parties[0].email
@@ -82,7 +110,13 @@ code: |
   docket_number
   set_progress(48)
   trial_court
+  appeal_reply_arguments
   appeal_reply_conclusion
+  set_progress(64)
+  filing_institution
+  filing_electronic
+  filing_mail
+  signature_fields
   users[0].signature_date
   interview_order_informal_reply_brief_form = True
 ---
@@ -111,31 +145,107 @@ continue button field: informal_reply_brief_form_intro
 question: |
   Informal reply brief form
 subquestion: |
-  Before you get started, you need to...
+    You will need to know the following information to complete this interview:
 
-
+        * The **Appeals Court** docket number for your case
+        * The **Trial Court** docket number for your case
+        * The names of the plaintiff(s) and defendant(s) in your trial court case
+        * The current due date for your brief
+        * The date by which you are able to file your brief by, within the court guidelines 
 ---
 id: Users 0 signature date
 question: |
-  Users[0].signature date
+  Today's Date
 fields:
-  - "Date of Users[0].signature": users[0].signature_date
+  - "Today's date": users[0].signature_date
     datatype: date
 ---
 id: Users 0 pronouns
 question: |
-  Users[0].pronouns
+  What are your pronouns?
+fields: 
+  - "My pronouns are": users[0].pronouns
+    input type: text
+    required: False
+---
+id: Information
+question: |
+  Information
+subquestion: |
+ 
+  - The purpose of a reply brief is to respond to arguments raised by the appellee in their brief, not to repeat arguments already made in your original brief.
+
+  - You can use this form to file an informal reply brief if you are appealing a court's decision to the Massachusetts Appeals Court.
+
+
+  Click "Help" to access a checklist for filing a reply brief
+help: |
+    - https://www.mass.gov/doc/checklist-for-preparing-a-brief-and-record-appendix-appeals-court/download
+continue button field: Information
+---
+id: docket number 
+question: |
+  What is the **Appeals Court** docket number for your case?
 fields:
-  - "Users[0].pronouns": users[0].pronouns
+  - "Docket number": docket_number
+    help: |
+      Example: 1448CV001026
+---
+id: Appeal reply arguments
+question: |
+  What is your argument?
+subquestion: |  
+    - You may respond to specific arguments made in the appellee brief, supporting your response(s) with citations to legal authorities such as case decisions (preferably from Massachusetts), statutes, regulations, court rules, constitutional provisions, or other authorities.  Any facts you discuss must be followed by a reference to the page(s) in the record appendix, supplemental appendix, or transcript(s) where the fact(s) appear(s).  
+    - You may not discuss new facts or make new arguments, because the other side will not have a chance to respond.  The rules for confidential and impounded information that apply to all briefs, including informal appellant and appellee briefs, also apply to this informal reply brief.
+fields: 
+  - "Appeal reply arguments": appeal_reply_arguments
+    input type: area
 ---
 id: Appeal reply conclusion
 question: |
   Appeal reply conclusion
+subquestion: |
+  Write a statement of what you are asking the Appeals Court to do (for example, affirm the judgment)
 fields:
   - "Appeal reply conclusion": appeal_reply_conclusion
-  - "Appeal reply arguments[i].legal citation": appeal_reply_arguments[i].legal_citation
-  - "Appeal reply arguments[i].reason": appeal_reply_arguments[i].reason
-  - "Appeal reply arguments[i].fact reference": appeal_reply_arguments[i].fact_reference
+    input type: area
+---
+id: filing_institution
+question: |
+  Are you currently in a federal or state prison?
+yesno: filing_institution
+help: |
+      If you are in a federal or state prison, then you will mail the brief. There is a form that will automatically attach to your document. 
+---
+id: filing_mail
+question: |
+  Are you filing this brief in the **mail**?
+  
+  - **Note:** You can only file this brief one time. If you choose to file by mail, do not file electronically. If you choose to file electronically, do not file by mail.
+yesno: filing_mail
+---
+id: filing_electronic
+question: |
+  Are you filing this brief **electronically**?
+  
+  - **Note:** You can only file this brief one time. If you choose to file by mail, do not file electronically. If you choose to file electronically, do not file by mail.
+yesno: filing_electronic
+help: |
+  We will give you instructions on how to do this at the end of the interview. If you choose to select "No" then you will have to mail the brief. We will automatically fill out a form for you that will attach to your brief.
+---
+id: user role
+question: |
+  Are you an appellant or appellee ?
+subquestion: | 
+  This form is for appellants. An **appellant** is a party who is asks a higher court to review the decision of the lower court, regardless of their party designation in the trial court.
+  
+  An **appellee** is a party who is not appealing and intends to respond to the appellant's request for a review of the lower court's decision, regardless of their party designation in the trial court.
+  
+fields: 
+  - no label: user_role 
+    input type: radio 
+    choices: 
+      - Appellant: APPELLANT #only offering one option for the user. We can make this conditional to direct the user to either the appellant brief or appellee brief.
 ---
 id: preview informal_reply_brief_form
 question: |
